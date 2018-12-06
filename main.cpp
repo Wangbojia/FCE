@@ -141,6 +141,8 @@ int Get_max(int l[], int len) {
 
 
 
+
+
 bool isempty(vector<bool> a) {
 	for (int i = 0; i < a.size(); i++) {
 		if (a[i] == false)
@@ -345,20 +347,26 @@ float Energy_consumption(int core[]) {
 
 }
 
-vector<int> ready1(10);
-vector<int> ready2(10, -1);
 
+
+
+//return time and E
+vector<float> Ker_alg(int N, int K)  
 //try executing task[N] on Kth core/cloud
-vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«²¿Ö®ºóÓÃNKÇó RT£¬FT£¬CORE
+//å¥½åƒä¸ç”¨å…¨éƒ¨returnï¼Œè®°å½•ä¸‹Nï¼ŒKå°±è¡Œ,æ‰§è¡Œå…¨éƒ¨ä¹‹åç”¨NKæ±‚ RTï¼ŒFTï¼ŒCORE
 //return the new energy consumption and application completion time for comparison(and S?)
 
 {
+	vector<int> ready1(10);
+	vector<int> ready2(10, -1);
+	cout << endl;
+	cout << "Runing Ker_org. I'm taking N=" << N << " ,K=" << K << endl;
 	//used to store the execution core
 	int core[10];
 	copy(begin(Ti_core), end(Ti_core), begin(core));
 	core[N] = K;
-	cout << "the location of execution is" << endl;
-	Print_vec(core,10);
+	//cout << "the location of execution is" << endl;
+	//Print_vec(core,10);
 	//get Sk_new
 	vector<vector<int>> Snew = S;
 	//erase i from the original S[k] list
@@ -377,7 +385,7 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 	}
 	//now we have the new sequence sets Snew
 
-	cout << "new sequence initialized" << endl;
+	//cout << "new sequence initialized" << endl;
 
 
 	for (int i = 0; i < 10; i++) {
@@ -385,8 +393,8 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 		if (ready1[i] == 0)
 			ready2[i] = 0;
 	}
-	cout << "original ready1" << endl;
-	printv(ready1);
+	//cout << "original ready1" << endl;
+	//printv(ready1);
 	vector<int> stack;
 	vector<int> stackstatus(10, 0); //denote if a task is in the stack; 0:not in; 1:in
 	//initialize the stack by pushing task i into it
@@ -419,13 +427,13 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 	while (stack.size() != 0) {
 		//pop a task vi from the stack
 		int cur = stack.back();
-		cout << "task " << cur << " exe on core" << core[cur] << endl;
+		//cout << "task " << cur << " exe on core" << core[cur] << endl;
 		schedstatus[cur] = 1; //marked scheduled
-		cout << "the stack before pop" << endl;
-		printv(stack);
+		//cout << "the stack before pop" << endl;
+		//printv(stack);
 		stack.pop_back();  //delete the last element
-		cout << "the stack is now" << endl;
-		printv(stack);
+		//cout << "the stack is now" << endl;
+		//printv(stack);
 		if (core[cur] == 0)
 			//means it's a cloud task
 		{
@@ -441,6 +449,8 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 				RTwr[cur] = FTc[cur];
 				FTwr[cur] = FTc[cur] + Tr;
 				RC[5] = FTwr[cur];
+				//cout << "available time after 1st task" << endl;
+				//printv(RC);
 				
 			}
 			else
@@ -452,20 +462,29 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 					totalmax = max(totalmax, curmax);
 				}
 				RTws[cur] = max(totalmax,RC[3]);
+
 				FTws[cur] = RTws[cur] + Ts;
+
 				RC[3] = FTws[cur];
 				int maxftc = 0;
 				for (int m = 0; m < predvec.size(); m++) {
 					int curftc = FTc[predvec[m] - 1];
 					maxftc = max(maxftc, curftc);
 				}
-				RTc[cur] = max(FT_ws[cur], maxftc);
+				RTc[cur] = max(FTws[cur], maxftc);
+				//cout << "finish time for wireless send is " << FTws[cur] << endl;
+				//cout << "current readytime for cloud is " << RTc[cur]<<endl;
+				//cout << "available time for cloud is " << RC[4]<< endl;
 				RTc[cur] = max(RTc[cur], RC[4]);
+				//cout << "the final ready time is" << RTc[cur] << endl;
 				FTc[cur] = RTc[cur] + Tc;
 				RC[4] = FTc[cur];
-				FTwr[cur] = FTc[cur] + Tr;
-				RTwr[cur] = (FTc[cur], RC[5]);
+				RTwr[cur] = max(FTc[cur], RC[5]);
+				FTwr[cur] = FTc[cur] + Tr;				
 				RC[5] = FTwr[cur];
+
+				//cout << "new available time" << endl;
+				//printv(RC);
 			}
 		}
 		else
@@ -481,6 +500,8 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 				FTc[cur] = 0;
 				FTws[cur] = 0;
 				FTwr[cur] = 0;
+				//cout << "available time after 1st task" << endl;
+				//printv(RC);
 			}
 			else
 			{	//find the max finish time of immediate predessors of c
@@ -493,7 +514,7 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 				RTl[cur] = max(totalmax,RC[core[cur]-1]);
 
 
-				if (core[cur] == 1) {//ÊÇ²»ÊÇ¸ÃÏÈÇóFTlÔÙ¸üĞÂRC£¿
+				if (core[cur] == 1) {
 					FTl[cur] = RTl[cur] + Ti1l[cur];
 					RC[0] = FTl[cur];
 
@@ -512,6 +533,8 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 					FT_ws[cur] = 0;
 					FT_wr[cur] = 0;
 				}
+				//cout << "new available time" << endl;
+				//printv(RC);
 			}
 		}
 
@@ -521,17 +544,12 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 			ready1[asucc] -= 1;
 			
 		}
-		cout << "updated ready1" << endl;
-		printv(ready1);
+		//cout << "updated ready1" << endl;
+		//printv(ready1);
 		//for all predecessors(i) of cur, if status i is scheduled, ready2[cur]=0;
-		cout << "schedule status" << endl;
-		printv(schedstatus);
-		//vector<int> prec = pred[cur];  //////////²»Ó¦¸ÃÊÇcur
-		//for (int i = 0; i < prec.size(); i++) {
-		//	if (schedstatus[prec[i]-1] == 0)
-		//		break;
-		//	ready2[cur] = 0;
-		//}
+		//cout << "schedule status" << endl;
+		//printv(schedstatus);
+
 		//modified, rewiritten first find S[k] which contains vi, then check if all tasks before vi have been scheduled
 		//m denotes the #task
 		for (int m = 0; m < 10; m++) {
@@ -548,8 +566,8 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 		}
 
 
-		cout << "updated ready2" << endl;
-		printv(ready2);
+		//cout << "updated ready2" << endl;
+		//printv(ready2);
 		//push all the new tasks vj with ready1j=0 and ready2j=0
 		for (int i = 0; i < 10; i++) {
 			if (ready1[i] == 0 && ready2[i] == 0)
@@ -557,33 +575,135 @@ vector<float> Ker_alg(int N, int K)  //ºÃÏñ²»ÓÃÈ«²¿return£¬¼ÇÂ¼ÏÂN£¬K¾ÍĞĞ,Ö´ĞĞÈ«
 				{
 					stack.push_back(i);
 					stackstatus[i] = 1;
-					cout << "push task " << i << " into the stack" << endl;
+					//cout << "push task " << i << " into the stack" << endl;
 					
 				}
-			cout << "I'm here!!" << endl;
 		}
 	}
-	cout << "kernal alg finish time" << endl;
+	cout << "ready time ws" << endl;
+	printv(RTws);
+	cout << "finish time wireless send" << endl;
+	printv(FTws);
+	cout << "ready time c" << endl;
+	printv(RTc);
+	cout << "finish time cloud" << endl;
+	printv(FTc);	
+	cout << "ready time wr" << endl;
+	printv(RTwr);
+	cout << "Finish time wireless receive" << endl;
+	printv(FTwr);	
+	cout << "readytime l" << endl;
+	printv(RTl);
+	cout << "Finish time local" << endl;
 	printv(FTl);
-	printv(FTwr);
-	float finish_time = max(FTl[9], FTwr[9]);  ////////////////////////////////FTl ºÍ FTwr¶¼Ã»±»¸üĞÂ
+	cout << "execute core" << endl;
+	Print_vec(core,10);
+	
+	float max1 = *max_element(FTl.begin(),FTl.end());
+	float max2 = *max_element(FTwr.begin(), FTwr.end());
+
+	float finish_time = max(max1, max2);
+
+
 	float engergy_cost = Energy_consumption(core);
 	vector<float> res{ finish_time,engergy_cost };
 	return res;
 }
 
 
-void Outerloop() {
-	//go through all possibilities
+vector<float> Outerloop_once(float Eorg = Energy_consumption(Ti_core), float Torg = max(FT_l[9], FT_wr[9])) 
+//go through all choices once
+{
+	//float Eorg = Energy_consumption(Ti_core);
+	//float Torg = max(FT_l[9], FT_wr[9]);
+	float delE = 0;
+	int besti = -1;
+	int bestk = -1;
+	//go through all choices
 	for(int i=0;i<10;i++)
-		for (int k = 0; k < 4; k++) {
-			if (Ti_core[i] == k)
+		for (int k = 0; k < 4; k++) { 
+			if (Ti_core[i] == k||Ti_core[i]==0) //skip the same schedule and cloud task don't reschedule as the paper says.
 				continue;
-			//code
+			vector<float> thisres = Ker_alg(i, k);
+			if(thisres[0]<=Torg)
+				if (thisres[1] < Eorg) {
+					float thisdelE = Eorg - thisres[1];
+					if (thisdelE > delE) {
+						delE = thisdelE;
+						besti = i;
+						bestk = k;
+					}
+				}
 		}
+	if (besti == -1)//means the time cannot be decreased,then we select the result in the largest ratio of E reduction to the increase of T
+	{
+		cout << "running time cannot be deducted" << endl;
+		float largest_ratio = 0.0;
+		for (int i = 0; i < 10; i++)
+			for (int k = 0; k < 4; k++) {
+				if (Ti_core[i] == k || Ti_core[i] == 0) //skip the same schedule and cloud task don't reschedule as the paper says.
+					continue;
+				vector<float> thisres = Ker_alg(i, k);
+					if (thisres[1] < Eorg) {
+						float thisdelE = Eorg - thisres[1];
+						float T_incres = thisres[0] - Torg;
+						float thisratio = thisdelE / T_incres;
+						if (thisratio > largest_ratio) {
+							largest_ratio=thisratio;
+							besti = i;
+							bestk = k;
+						}
+					}
+			}
+	}
+	//time and energy consumption
+	vector<float>  te = Ker_alg(besti, bestk); 
+	cout << "besti=" << besti << " bestk=" << bestk << endl;
+	
+	vector<float> a = { float(besti),float(bestk),te[0],te[1] };
+
+	if(besti!=-1)
+		Ti_core[besti] = bestk; //update the execute location for task(besti)
+
+	//cout << "exe cores" << endl;
+	//Print_vec(Ti_core, 10);
+	
+	return a;
 }
 
-
+vector<float> Outerloop_it() {
+	vector<float> res = Outerloop_once();
+	float maxtime = 27.0;
+	float time = res[2];
+	float energy = res[3];
+	int count = 0;
+	cout << "current core schedule is" << endl;
+	Print_vec(Ti_core, 10);
+	while (true)
+	{
+		cout << "I'm in the " << count << " while loop" << endl;
+		count += 1;
+		cout << "I'm going to the outerloop" << endl;
+		vector<float> newres = Outerloop_once(energy, time); //go through all choices and find transfer task i to core k, get finishtime and engergy consump
+		cout << "time and cost after run outloop once" << endl;
+		printv(newres);
+		if (newres[0] == -1) //cannot find a better solution
+		{
+			cout << "the result cannot be improved QAQ" << endl;
+			break;
+		}
+		if (float(newres[2]) > maxtime || float(newres[3]) >= energy) //////////////////
+		{
+			cout << "I can't find a better choice" << endl;
+			break;
+		}
+		time = newres[2];
+		energy = newres[3];
+		cout << "time cost is " << time << " engergy cost is " << energy << endl;
+	}
+	vector<float> finalres = { time,energy };
+	return finalres;
+}
 
 
 void Printtime() {
@@ -624,8 +744,16 @@ int main() {
 	printv(S[3]);
 	float E1 = Energy_consumption(Ti_core);
 	cout <<"the engergy cost after initial sched is " <<E1<<endl;
-	vector<float> temp = Ker_alg(3, 2);
-	cout << "after kernal alg" << endl;
-	printv(temp);
+
+	//vector<float> temp = Ker_alg(3, 2);
+	//cout << "after kernal alg" << endl;
+	//printv(temp);
+
+	vector<float> time_energy = Outerloop_it();
+	cout << "final time and energy cost is" << endl;
+	printv(time_energy);
+	cout << "final arrangement" << endl;
+	Print_vec(Ti_core,10);
+
 	return 0;
 }
